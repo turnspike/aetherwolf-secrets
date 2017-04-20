@@ -1,0 +1,40 @@
+# ---- Gmail Example
+
+
+# ---- Fastmail Example
+
+IMAPAccount fastmail
+Host imaps:mail.messagingengine.com
+User username@fastmail.com
+#PassCmd "~/bin/imap-pass.py -g username@fastmail.com"
+PassCmd "keyring get email username@fastmail.com" # retrieve password from "keyring" utility
+# you may have to tweak the awk here + filename to your netrc/authinfo:
+#PassCmd "gpg2 -q --for-your-eyes-only --no-tty -d $HOME/.netrc.gpg | awk '$2==\"mail.messagingengine.com\" && $4==\"me@fastmail.com\" {print $6;exit(0)}'"
+Port 992
+# fastmail port 992 has a "flat" hierarchy; use with mail_location = maildir:~/.Maildir/:LAYOUT=fs:INBOX=~/.Maildir/INBOX
+# use 993 for nested: https://blog.fastmail.com/2008/08/11/alternate-namespace-imap-port-may-help-outlook-ol-express-apple-mail-and-bis-users/
+
+IMAPStore fastmail-remote
+Account fastmail
+
+MaildirStore fastmail-local # set local maildir
+Path ~/email/ # the trailing "/" is meaningful
+Inbox ~/email/inbox
+
+Channel fastmail
+Master :fastmail-remote: # root webmail folder
+Slave :fastmail-local:
+Patterns * # match/exclude patterns
+Create Slave # create local folders if they exist on webmail
+Sync All # ?
+Expunge Both # delete messages if deleted via webmail or local
+SyncState * # save sync states to prevent eg duplicate msg downloads
+
+# Channel fastmail-native
+# Master :fastmail-remote:
+# Slave :fastmail-local:
+# Patterns *
+# Create Slave
+# Sync All
+# Expunge Both
+# SyncState *
